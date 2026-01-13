@@ -6,7 +6,7 @@
 [node name="MundoTeste" type="Node2D"]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
-position = Vector2( 496, 160 )
+position = Vector2( 480, 176 )
 
 [node name="chao" parent="." instance=ExtResource( 2 )]
 tile_data = PoolIntArray( 65544, 0, 0, 131080, 0, 0, 196608, 0, 0, 196609, 0, 0, 196610, 0, 0, 196611, 0, 0, 196612, 0, 0, 196613, 0, 0, 196614, 0, 0, 196615, 0, 0, 196616, 0, 0, 196617, 0, 0, 196618, 0, 0, 196619, 0, 0, 196620, 0, 0, 196621, 0, 0, 196622, 0, 0 )

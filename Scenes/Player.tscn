@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://icon.png" type="Texture" id=1]
 [ext_resource path="res://Scripts/Player.gd" type="Script" id=2]
+[ext_resource path="res://Scripts/Status.gd" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 16, 16 )
@@ -9,6 +10,7 @@ extents = Vector2( 16, 16 )
 [node name="Player" type="KinematicBody2D"]
 script = ExtResource( 2 )
 parede = NodePath("WallRay")
+status = NodePath("Status")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
@@ -27,3 +29,12 @@ drag_margin_v_enabled = true
 [node name="WallRay" type="RayCast2D" parent="."]
 enabled = true
 cast_to = Vector2( 20, 0 )
+
+[node name="Status" type="Node" parent="."]
+script = ExtResource( 3 )
+jogador = NodePath("..")
+tempo = NodePath("Timer")
+
+[node name="Timer" type="Timer" parent="Status"]
+
+[connection signal="timeout" from="Status/Timer" to="Status" method="_on_Timer_timeout"]

@@ -2,10 +2,10 @@ extends KinematicBody2D
 
 class_name Player
 
-var velocidade:int=32;
-var gravidade_player:int=32;
+var velocidade:int=64;
+var gravidade_player:int=48;
 var movimento:Vector2;
-var velocidade_pulo:int=-64;
+var velocidade_pulo:int=-80;
 var no_chao:bool=0;
 var pulando:bool=0;
 var direcao_parede:int=1;
@@ -13,6 +13,7 @@ var na_parede:bool=0;
 var pulo_parede:bool=0;
 
 export(NodePath) onready var parede=get_node(parede);
+export(NodePath) onready var status=get_node(status);
 
 func _physics_process(delta:float):
 	movimento_horizontal();
@@ -39,6 +40,13 @@ func movimento_vertical()->void:
 		pulando=0;
 		pulo_parede=0;
 	else:pass;
+	
+	if not no_chao and not pulo_parede:
+		if Input.is_action_just_pressed("pulo"):
+			if status.perde_vida(1):
+				movimento.y=velocidade_pulo*0.7;
+			else:
+				print('não consigo pular denovo')
 	
 	
 	if desliza_parede():
@@ -71,10 +79,10 @@ func movimento_vertical()->void:
 			pulando=1;
 			direcao_parede*=-1;
 			
-			movimento.y=velocidade_pulo*0.4;
+			movimento.y=velocidade_pulo*0.6;
 			
-		if movimento.x<32:
-			movimento.x+=direcao_parede*16;
+		if movimento.x<16:
+			movimento.x+=direcao_parede*48;
 		else:
 			pulo_parede=0;
 
@@ -99,7 +107,7 @@ func gravidade(delta:float)->void:
 		
 		
 func desliza_parede()->bool:
-	parede.cast_to.x=20*direcao_parede;
+	parede.cast_to.x=17*direcao_parede;
 	
 	if parede.is_colliding():
 		if not na_parede and not no_chao :
@@ -112,3 +120,13 @@ func desliza_parede()->bool:
 		na_parede=0;
 		
 		return false;
+		
+		
+
+func _input(event):
+	if event.is_action_pressed("conta_oxg"):
+		status.inicia_timer();
+		
+		
+	if event.is_action_pressed("recarrega_oxg"):
+		status.recarrega();

@@ -2,7 +2,7 @@ extends KinematicBody2D
 
 class_name Player
 
-var velocidade:int=64;
+var velocidade:int=32;
 var gravidade_player:int=48;
 var movimento:Vector2;
 var velocidade_pulo:int=-80;
@@ -11,15 +11,19 @@ var pulando:bool=0;
 var direcao_parede:int=1;
 var na_parede:bool=0;
 var pulo_parede:bool=0;
+var morrendo:bool=0;
+var ponto_de_controle:Vector2;
 
 export(NodePath) onready var parede=get_node(parede);
 export(NodePath) onready var status=get_node(status);
+export(NodePath) onready var sprite=get_node(sprite);
+export(NodePath) onready var hud=get_node(hud);
 
 func _physics_process(delta:float):
 	movimento_horizontal();
-	movimento_vertical();
-	gravidade(delta);
-	desliza_parede()
+	movimento_vertical(delta);
+	desliza_parede();
+	sprite.toca_animacao(movimento);
 	
 	movimento=move_and_slide(movimento,Vector2.UP);
 	
@@ -34,7 +38,14 @@ func movimento_horizontal()->void:
 
 
 	
-func movimento_vertical()->void:
+func movimento_vertical(delta:float)->void:
+	
+	if pulando:
+		sprite.animacao_cai();
+	
+	if not is_on_floor():
+		gravidade(delta);
+	
 	if is_on_floor():
 		no_chao=1;
 		pulando=0;
@@ -45,6 +56,7 @@ func movimento_vertical()->void:
 		if Input.is_action_just_pressed("pulo"):
 			if status.perde_vida(1):
 				movimento.y=velocidade_pulo*0.7;
+				hud.tira_capsula();
 			else:
 				print('não consigo pular denovo')
 	
@@ -67,6 +79,8 @@ func movimento_vertical()->void:
 		if Input.is_action_just_pressed("pulo") and no_chao:
 			no_chao=0;
 			pulando=1;
+			
+			sprite.animacao_pulo(movimento);
 			
 			movimento.y=velocidade_pulo*0.5;
 			
@@ -103,11 +117,12 @@ func gravidade(delta:float)->void:
 		
 		if movimento.y>=gravidade_player*0.7:
 			movimento.y=gravidade_player*0.7;
+			
 		
 		
 		
 func desliza_parede()->bool:
-	parede.cast_to.x=17*direcao_parede;
+	parede.cast_to.x=5*direcao_parede;
 	
 	if parede.is_colliding():
 		if not na_parede and not no_chao :
@@ -123,10 +138,46 @@ func desliza_parede()->bool:
 		
 		
 
-func _input(event):
+func _input(event)->void:
+	
 	if event.is_action_pressed("conta_oxg"):
-		status.inicia_timer();
+		retorna_ponto();
 		
 		
 	if event.is_action_pressed("recarrega_oxg"):
-		status.recarrega();
+		if status.recarrega():
+			hud.recarrega_oxg();
+			hud.tira_capsula();
+			morrendo=0;
+		
+
+
+func atualiza_hud(sufocando:bool)->void:
+	if not morrendo and sufocando:
+		morrendo=1;
+		hud.perigo();
+		
+	else:
+		hud.tira_oxg();
+	
+	
+func salvo()->void:
+	status.para_timer();
+	status.recupera();
+	hud.recarrega_capsulas();
+	hud.recarrega_oxg();
+	
+
+
+func correndo()->void:
+	status.inicia_timer();
+	
+	
+	
+func define_ponto(posicao:Vector2)->void:
+	ponto_de_controle=posicao;
+	
+
+
+func retorna_ponto()->void:
+	position=ponto_de_controle;

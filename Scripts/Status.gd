@@ -3,18 +3,25 @@ extends Node
 export(NodePath) onready var jogador=get_node(jogador);
 export(NodePath) onready var tempo=get_node(tempo);
 
-var resta:int=60;
+var resta:int=10;
 var vida:int=10;
-var estado_critico:bool=0;
+var sufocando:bool=0;
 var vivo:bool=1;
 
-var vida_atual:int=vida-1;
+var vida_atual:int=vida;
 
+
+
+func recupera()->void:
+	recarrega();
+	vida_atual=vida;
+	if vivo:pass;
+	else:
+		vivo=1;
 
 func perde_vida(quantidade:int)->bool:
 	if vida_atual>0:
-		vida_atual-=1;
-		print('restam apenas ',vida_atual,' cargas de o²')
+		vida_atual-=quantidade;
 		
 		return true;
 		
@@ -23,39 +30,48 @@ func perde_vida(quantidade:int)->bool:
 	
 	
 
-func recarrega()->void:
-	if estado_critico:
+func recarrega()->bool:
+	if sufocando:
 		if perde_vida(1):
 			resta=10;
-			estado_critico=0;
+			sufocando=0;
+			tempo.wait_time=6;
+			return true;
 		else:
-			print("não tenho cargas de o²")
+			return false;
 		
 	else:
-		print("não preciso disso")
+		return false;
 	
 	
 
 func inicia_timer()->void:
 	tempo.start();
 	
+	
+	
+func para_timer()->void:
+	tempo.stop();
+	
 
 
 func _on_Timer_timeout():
 	resta-=1;
 	
-	
-	if estado_critico:
+	if sufocando:
 		if resta:
-			print(resta);
+			jogador.atualiza_hud(sufocando);
 		else:
 			vivo=0;
 			tempo.stop();
 			jogador.set_physics_process(false);
 	else:
 		if resta:
-			pass;
+			jogador.atualiza_hud(sufocando);
 		else:
-			print('você entrou em estado critico');
 			resta=11;
-			estado_critico=1;
+			sufocando=1;
+			tempo.wait_time=1;
+			jogador.atualiza_hud(sufocando);
+	
+	

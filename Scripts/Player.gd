@@ -13,6 +13,8 @@ var na_parede:bool=0;
 var pulo_parede:bool=0;
 var morrendo:bool=0;
 var ponto_de_controle:Vector2;
+var bate:CollisionObject;
+
 
 export(NodePath) onready var parede=get_node(parede);
 export(NodePath) onready var status=get_node(status);
@@ -57,8 +59,7 @@ func movimento_vertical(delta:float)->void:
 			if status.perde_vida(1):
 				movimento.y=velocidade_pulo*0.7;
 				hud.tira_capsula();
-			else:
-				print('não consigo pular denovo')
+			
 	
 	
 	if desliza_parede():
@@ -94,6 +95,7 @@ func movimento_vertical(delta:float)->void:
 			direcao_parede*=-1;
 			
 			movimento.y=velocidade_pulo*0.6;
+
 			
 		if movimento.x<16:
 			movimento.x+=direcao_parede*48;
@@ -125,6 +127,7 @@ func desliza_parede()->bool:
 	parede.cast_to.x=5*direcao_parede;
 	
 	if parede.is_colliding():
+		sprite.modulate="#55e33d"
 		if not na_parede and not no_chao :
 			movimento.y=0;
 			na_parede=1;
@@ -132,6 +135,7 @@ func desliza_parede()->bool:
 		return true;
 		
 	else:
+		sprite.modulate="#ffffff"
 		na_parede=0;
 		
 		return false;
@@ -139,11 +143,6 @@ func desliza_parede()->bool:
 		
 
 func _input(event)->void:
-	
-	if event.is_action_pressed("conta_oxg"):
-		retorna_ponto();
-		
-		
 	if event.is_action_pressed("recarrega_oxg"):
 		if status.recarrega():
 			hud.recarrega_oxg();
@@ -152,13 +151,19 @@ func _input(event)->void:
 		
 
 
+func dano()->void:
+	hud.tira_capsula();
+
+
 func atualiza_hud(sufocando:bool)->void:
 	if not morrendo and sufocando:
 		morrendo=1;
 		hud.perigo();
-		
 	else:
 		hud.tira_oxg();
+		
+	if morrendo and not sufocando:
+		morrendo=0;
 	
 	
 func salvo()->void:
@@ -166,6 +171,7 @@ func salvo()->void:
 	status.recupera();
 	hud.recarrega_capsulas();
 	hud.recarrega_oxg();
+	morrendo=0;
 	
 
 
@@ -181,3 +187,13 @@ func define_ponto(posicao:Vector2)->void:
 
 func retorna_ponto()->void:
 	position=ponto_de_controle;
+
+
+func _on_OlhaColisao_body_shape_entered(body_rid, body, body_shape_index, local_shape_index):
+	if body.name == "Espinhos":
+		status.machuca();
+
+
+func _on_Dano_area_entered(area):
+	if area.name=="Ataque":
+		status.machuca();

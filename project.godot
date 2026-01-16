@@ -9,10 +9,25 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "KinematicBody2D",
+"class": "Broca",
+"language": "GDScript",
+"path": "res://Scripts/Broca.gd"
+}, {
+"base": "Node2D",
+"class": "CaixaDeDialogo",
+"language": "GDScript",
+"path": "res://Scripts/CaixaDeDialogo.gd"
+}, {
 "base": "Node2D",
 "class": "Checkpoint",
 "language": "GDScript",
 "path": "res://Scripts/Checkpoint.gd"
+}, {
+"base": "KinematicBody2D",
+"class": "Drone",
+"language": "GDScript",
+"path": "res://Scripts/Drone.gd"
 }, {
 "base": "Control",
 "class": "HUD",
@@ -25,7 +40,10 @@ _global_script_classes=[ {
 "path": "res://Scripts/Player.gd"
 } ]
 _global_script_class_icons={
+"Broca": "",
+"CaixaDeDialogo": "",
 "Checkpoint": "",
+"Drone": "",
 "HUD": "",
 "Player": ""
 }

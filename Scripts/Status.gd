@@ -2,6 +2,10 @@ extends Node
 
 export(NodePath) onready var jogador=get_node(jogador);
 export(NodePath) onready var tempo=get_node(tempo);
+export(NodePath) onready var tempo_revive=get_node(tempo_revive);
+export(NodePath) onready var dano=get_node(dano);
+export(NodePath) onready var olha_colisao=get_node(olha_colisao);
+export(NodePath) onready var invensivel=get_node(invensivel);
 
 var resta:int=10;
 var vida:int=10;
@@ -10,6 +14,37 @@ var vivo:bool=1;
 
 var vida_atual:int=vida;
 
+
+
+func sem_ar()->void:
+	resta=11;
+	sufocando=1;
+	tempo.wait_time=1;
+
+
+func morre()->void:
+	vivo=0;
+	tempo.stop();
+	jogador.set_physics_process(false);
+	tempo_revive.start();
+	
+	
+func machuca()->void:
+	olha_colisao.set_deferred("monitoring",false);
+	dano.set_deferred("monitoring",false);
+	invensivel.start();
+	
+	
+	if not sufocando:
+		sem_ar();
+		jogador.atualiza_hud(sufocando);
+		
+	else:
+		if not perde_vida(1):
+			morre()
+		else:
+			jogador.dano();
+	
 
 
 func recupera()->void:
@@ -50,6 +85,7 @@ func inicia_timer()->void:
 	
 	
 	
+	
 func para_timer()->void:
 	tempo.stop();
 	
@@ -59,19 +95,26 @@ func _on_Timer_timeout():
 	resta-=1;
 	
 	if sufocando:
-		if resta:
-			jogador.atualiza_hud(sufocando);
-		else:
-			vivo=0;
-			tempo.stop();
-			jogador.set_physics_process(false);
+		if !resta:
+			morre();
+			
+			
 	else:
-		if resta:
-			jogador.atualiza_hud(sufocando);
-		else:
-			resta=11;
-			sufocando=1;
-			tempo.wait_time=1;
-			jogador.atualiza_hud(sufocando);
+		if !resta:
+			sem_ar();
+			
+	
+	jogador.atualiza_hud(sufocando);
 	
 	
+
+
+func _on_Revive_timeout():
+	jogador.retorna_ponto();
+	vivo=1;
+	jogador.set_physics_process(true);
+
+
+func _on_recupera_timeout():
+	olha_colisao.set_deferred("monitoring",true);
+	dano.set_deferred("monitoring",true);

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Sprites/jogador/player.png" type="Texture" id=1]
 [ext_resource path="res://Scripts/Player.gd" type="Script" id=2]
@@ -90,6 +90,12 @@ tracks/0/keys = {
 "values": [ 8 ]
 }
 
+[sub_resource type="RectangleShape2D" id=7]
+extents = Vector2( 4, 6.5 )
+
+[sub_resource type="RectangleShape2D" id=8]
+extents = Vector2( 5, 8 )
+
 [node name="Player" type="KinematicBody2D"]
 script = ExtResource( 2 )
 parede = NodePath("WallRay")
@@ -112,6 +118,7 @@ animacao = NodePath("../AnimationPlayer")
 [node name="Camera2D" type="Camera2D" parent="."]
 visible = false
 current = true
+limit_left = 0
 limit_top = 0
 drag_margin_h_enabled = true
 drag_margin_v_enabled = true
@@ -125,9 +132,21 @@ cast_to = Vector2( 5, 0 )
 script = ExtResource( 3 )
 jogador = NodePath("..")
 tempo = NodePath("Timer")
+tempo_revive = NodePath("Revive")
+dano = NodePath("../Dano")
+olha_colisao = NodePath("../OlhaColisao")
+invensivel = NodePath("recupera")
 
 [node name="Timer" type="Timer" parent="Status"]
 wait_time = 6.0
+
+[node name="Revive" type="Timer" parent="Status"]
+wait_time = 2.0
+one_shot = true
+
+[node name="recupera" type="Timer" parent="Status"]
+wait_time = 0.6
+one_shot = true
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 anims/RESET = SubResource( 2 )
@@ -136,4 +155,22 @@ anims/parado = SubResource( 3 )
 anims/pulo = SubResource( 5 )
 anims/queda = SubResource( 6 )
 
+[node name="Dano" type="Area2D" parent="."]
+visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Dano"]
+position = Vector2( 0, 1.5 )
+shape = SubResource( 7 )
+
+[node name="OlhaColisao" type="Area2D" parent="."]
+visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="OlhaColisao"]
+position = Vector2( 0, 1 )
+shape = SubResource( 8 )
+
 [connection signal="timeout" from="Status/Timer" to="Status" method="_on_Timer_timeout"]
+[connection signal="timeout" from="Status/Revive" to="Status" method="_on_Revive_timeout"]
+[connection signal="timeout" from="Status/recupera" to="Status" method="_on_recupera_timeout"]
+[connection signal="area_entered" from="Dano" to="." method="_on_Dano_area_entered"]
+[connection signal="body_shape_entered" from="OlhaColisao" to="." method="_on_OlhaColisao_body_shape_entered"]
